@@ -1,5 +1,6 @@
 package ua.kh.lual.sqlcmd.controller.web;
 
+import ua.kh.lual.sqlcmd.model.DBManagerException;
 import ua.kh.lual.sqlcmd.service.Service;
 import ua.kh.lual.sqlcmd.service.ServiceImpl;
 
@@ -10,20 +11,50 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
 public class MainServlet extends HttpServlet {
-    Service service = new ServiceImpl();
+    private Service service;
+
+    @Override
+    public void init() throws ServletException {
+        super.init();
+        service = new ServiceImpl();
+    }
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         String action = getAction(req);
         if (action.equals("")) {
             req.setAttribute("items", service.commandsList());
-            req.getRequestDispatcher("menu.jsp").forward(req,resp);
+            req.getRequestDispatcher("menu.jsp").forward(req, resp);
         } else if (action.equals("help")) {
-            req.getRequestDispatcher("help.jsp").forward(req,resp);
+            req.getRequestDispatcher("help.jsp").forward(req, resp);
+        } else if (action.equals("connect")) {
+            req.getRequestDispatcher("connect.jsp").forward(req, resp);
         } else {
-            req.getRequestDispatcher("error.jsp").forward(req,resp);
+            req.setAttribute("message", "unsupported request");
+            req.getRequestDispatcher("error.jsp").forward(req, resp);
         }
 
+    }
+
+    @Override
+    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        String action = getAction(req);
+        if (action.equals("connect")) {
+            String dbName = req.getParameter("dbname");
+            String userName = req.getParameter("username");
+            String password = req.getParameter("password");
+            try {
+                service.connect(dbName, userName, password);
+                resp.sendRedirect(resp.encodeRedirectURL(""));
+            } catch (Exception e) {
+                req.setAttribute("message",
+                        e.getMessage().replaceAll("<", "~bold")
+                                      .replaceAll(">", "dlob~")
+                                      .replaceAll("~bold", "<b>")
+                                      .replaceAll("dlob~", "</b>"));
+                req.getRequestDispatcher("error.jsp").forward(req, resp);
+            }
+        }
     }
 
     private String getAction(HttpServletRequest req) {

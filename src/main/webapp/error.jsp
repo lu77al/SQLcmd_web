@@ -5,7 +5,9 @@
         <base href="${pageContext.request.contextPath}/"/>
     </head>
     <body>
-Unsupported request<br>
+<b>Houston, we have a problem</b><br>
+<i>${message}</i><br>
+<br>
 return to <a href="">menu</a></br>
     </body>
 </html>
