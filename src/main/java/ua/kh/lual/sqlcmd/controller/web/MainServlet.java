@@ -1,6 +1,7 @@
 package ua.kh.lual.sqlcmd.controller.web;
 
 import ua.kh.lual.sqlcmd.model.DBManagerException;
+import ua.kh.lual.sqlcmd.model.DatabaseManager;
 import ua.kh.lual.sqlcmd.service.Service;
 import ua.kh.lual.sqlcmd.service.ServiceImpl;
 
@@ -22,6 +23,9 @@ public class MainServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         String action = getAction(req);
+
+        DatabaseManager dbManager = (DatabaseManager) req.getSession().getAttribute("db-manager");
+
         if (action.equals("")) {
             req.setAttribute("items", service.commandsList());
             req.getRequestDispatcher("menu.jsp").forward(req, resp);
@@ -29,6 +33,10 @@ public class MainServlet extends HttpServlet {
             req.getRequestDispatcher("help.jsp").forward(req, resp);
         } else if (action.equals("connect")) {
             req.getRequestDispatcher("connect.jsp").forward(req, resp);
+        } else if (action.equals("find")) {
+            String tableName = req.getParameter("table");
+            req.setAttribute("table", service.find(dbManager, tableName));
+            req.getRequestDispatcher("find.jsp").forward(req, resp);
         } else {
             req.setAttribute("message", "unsupported request");
             req.getRequestDispatcher("error.jsp").forward(req, resp);
@@ -40,11 +48,13 @@ public class MainServlet extends HttpServlet {
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         String action = getAction(req);
         if (action.equals("connect")) {
+            req.setCharacterEncoding("UTF-8");
             String dbName = req.getParameter("dbname");
             String userName = req.getParameter("username");
             String password = req.getParameter("password");
             try {
-                service.connect(dbName, userName, password);
+                DatabaseManager dbManager = service.connect(dbName, userName, password);
+                req.getSession().setAttribute("db-manager", dbManager);
                 resp.sendRedirect(resp.encodeRedirectURL(""));
             } catch (Exception e) {
                 req.setAttribute("message",

@@ -18,7 +18,7 @@ public class MemoryTable {
 
     public List<List> getContent() {
         List<List> result = new LinkedList<>();
-        content.forEach(row -> result.add(new ArrayList<Object>(row.values())));
+        content.forEach(row -> result.add(new ArrayList<>(row.values())));
         return result;
     }
 
@@ -26,7 +26,7 @@ public class MemoryTable {
         List<List> result = new LinkedList<>();
         content.forEach(row -> {
             if (row.entrySet().containsAll(key.entrySet())) {
-                result.add(new ArrayList<Object>(row.values()));
+                result.add(new ArrayList<>(row.values()));
             }
         });
         return result;

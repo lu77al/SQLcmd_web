@@ -1,0 +1,19 @@
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
+<html>
+    <head>
+        <title>SQLCmd</title>
+    </head>
+    <body>
+        <table>
+        <c:forEach items="${table}" var="row">
+            <tr>
+            <c:forEach items="${row}" var="element">
+                <td>
+                    ${element}
+                </td>
+            </c:forEach>
+            </tr>
+        </c:forEach>
+        </table>
+    </body>
+</html>

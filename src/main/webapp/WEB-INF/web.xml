@@ -6,6 +6,13 @@
 
     <display-name>juja-sqlcmd</display-name>
 
+    <jsp-config>
+        <jsp-property-group>
+            <url-pattern>*.jsp</url-pattern>
+            <page-encoding>UTF-8</page-encoding>
+        </jsp-property-group>
+    </jsp-config>
+
     <servlet>
         <servlet-name>MainServlet</servlet-name>
         <servlet-class>ua.kh.lual.sqlcmd.controller.web.MainServlet</servlet-class>
