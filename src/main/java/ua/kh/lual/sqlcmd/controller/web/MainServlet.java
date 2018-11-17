@@ -22,39 +22,64 @@ public class MainServlet extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        DatabaseManager dbManager = (DatabaseManager) req.getSession().getAttribute("db_manager");
+        if (dbManager == null) {
+            req.getRequestDispatcher("connect.jsp").forward(req, resp);
+            return;
+        }
+
         String action = getAction(req);
 
-        DatabaseManager dbManager = (DatabaseManager) req.getSession().getAttribute("db-manager");
-
         if (action.equals("")) {
-            req.setAttribute("items", service.commandsList());
-            req.getRequestDispatcher("menu.jsp").forward(req, resp);
-        } else if (action.equals("help")) {
-            req.getRequestDispatcher("help.jsp").forward(req, resp);
-        } else if (action.equals("connect")) {
-            req.getRequestDispatcher("connect.jsp").forward(req, resp);
-        } else if (action.equals("find")) {
+            req.setAttribute("tables", service.tables(dbManager));
+            req.getRequestDispatcher("tables.jsp").forward(req, resp);
+        } else  if (action.equals("find")) {
             String tableName = req.getParameter("table");
-            req.setAttribute("table", service.find(dbManager, tableName));
+            req.setAttribute("name", tableName);
+            req.setAttribute("content", service.find(dbManager, tableName));
             req.getRequestDispatcher("find.jsp").forward(req, resp);
-        } else {
-            req.setAttribute("message", "unsupported request");
-            req.getRequestDispatcher("error.jsp").forward(req, resp);
         }
+
+//        if (action.equals("")) {
+//            req.setAttribute("items", service.commandsList());
+//            req.getRequestDispatcher("menu.jsp").forward(req, resp);
+//        } else if (action.equals("help")) {
+//            req.getRequestDispatcher("help.jsp").forward(req, resp);
+//        } else if (action.equals("connect")) {
+//            req.getRequestDispatcher("connect.jsp").forward(req, resp);
+//        } else if (action.equals("find")) {
+//            String tableName = req.getParameter("table");
+//            req.setAttribute("table", service.find(dbManager, tableName));
+//            req.getRequestDispatcher("find.jsp").forward(req, resp);
+//        } else {
+//            req.setAttribute("message", "unsupported request");
+//            req.getRequestDispatcher("error.jsp").forward(req, resp);
+//        }
 
     }
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         String action = getAction(req);
+        if (action.equals("disconnect")) {
+            DatabaseManager dbManager = (DatabaseManager) req.getSession().getAttribute("db_manager");
+            if (dbManager != null) {
+                dbManager.disconnect();
+                dbManager = null;
+                req.getSession().setAttribute("db_manager", dbManager);
+            }
+            resp.sendRedirect(resp.encodeRedirectURL(""));
+            return;
+        }
         if (action.equals("connect")) {
             req.setCharacterEncoding("UTF-8");
             String dbName = req.getParameter("dbname");
             String userName = req.getParameter("username");
             String password = req.getParameter("password");
+            req.getSession().setAttribute("db_name", dbName);
             try {
                 DatabaseManager dbManager = service.connect(dbName, userName, password);
-                req.getSession().setAttribute("db-manager", dbManager);
+                req.getSession().setAttribute("db_manager", dbManager);
                 resp.sendRedirect(resp.encodeRedirectURL(""));
             } catch (Exception e) {
                 req.setAttribute("message",

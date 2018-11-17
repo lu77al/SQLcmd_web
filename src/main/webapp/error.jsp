@@ -1,14 +1,8 @@
-<html>
-    <head>
-        <title>SQLCmd</title>
-        <base href="${pageContext.request.contextPath}/"/>
-    </head>
-    <body>
+<jsp:include page="app_header.jsp" />
 
-        <b>Houston, we have a problem</b><br>
-        <i>${message}</i><br>
-        <br>
-        return to <a href="">menu</a></br>
+<h4><font color="red">Houston, we have a problem</font></h4>
+<i>${message}</i><br>
+<br>
+<a href="">return</a></br>
 
-    </body>
-</html>
+<jsp:include page="app_footer.jsp" />

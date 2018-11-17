@@ -33,4 +33,9 @@ public class ServiceImpl implements Service {
         }
         return result;
     }
+
+    @Override
+    public Set<String> tables(DatabaseManager dbManager) {
+        return dbManager.getTableNames();
+    }
 }
