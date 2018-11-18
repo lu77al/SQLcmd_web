@@ -10,6 +10,9 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Set;
 
 public class MainServlet extends HttpServlet {
     private Service service;
@@ -22,13 +25,18 @@ public class MainServlet extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        String action = getAction(req);
+        if (action.equals("error")) {
+            req.setAttribute("message", req.getParameter("message"));
+            req.getRequestDispatcher("error.jsp").forward(req, resp);
+            return;
+        }
+
         DatabaseManager dbManager = (DatabaseManager) req.getSession().getAttribute("db_manager");
         if (dbManager == null) {
             req.getRequestDispatcher("connect.jsp").forward(req, resp);
             return;
         }
-
-        String action = getAction(req);
 
         if (action.equals("")) {
             req.setAttribute("tables", service.tables(dbManager));
@@ -38,6 +46,8 @@ public class MainServlet extends HttpServlet {
             req.setAttribute("name", tableName);
             req.setAttribute("content", service.find(dbManager, tableName));
             req.getRequestDispatcher("find.jsp").forward(req, resp);
+        } else  if (action.equals("create")) {
+            req.getRequestDispatcher("create.jsp").forward(req, resp);
         }
 
 //        if (action.equals("")) {
@@ -71,6 +81,42 @@ public class MainServlet extends HttpServlet {
             resp.sendRedirect(resp.encodeRedirectURL(""));
             return;
         }
+        if (action.equals("create")) {
+            req.getSession().setAttribute("new_table_name", req.getParameter("table_name"));
+            req.getSession().setAttribute("new_header", new LinkedHashSet<String>());
+            resp.sendRedirect(resp.encodeRedirectURL("create"));
+            return;
+        }
+        if (action.equals("add_column")) {
+            Set<String> newHeader = (LinkedHashSet)req.getSession().getAttribute("new_header");
+            newHeader.add(req.getParameter("column_name"));
+            req.getSession().setAttribute("new_header", newHeader);
+            resp.sendRedirect(resp.encodeRedirectURL("create"));
+            return;
+        }
+        if (action.equals("cancel_create")) {
+            req.getSession().setAttribute("new_header", null);
+            resp.sendRedirect(resp.encodeRedirectURL(""));
+            return;
+        }
+        if (action.equals("create_prepared")) {
+            String tableName = (String)req.getSession().getAttribute("new_table_name");
+            Set<String> newHeader = (LinkedHashSet)req.getSession().getAttribute("new_header");
+            DatabaseManager dbManager = (DatabaseManager) req.getSession().getAttribute("db_manager");
+            try {
+                service.create(dbManager, tableName, newHeader);
+                req.getSession().setAttribute("new_header", null);
+                resp.sendRedirect(resp.encodeRedirectURL(""));
+            } catch (Exception e) {
+                String error =
+                        e.getMessage().replaceAll("<", "~bold")
+                                .replaceAll(">", "dlob~")
+                                .replaceAll("~bold", "<b>")
+                                .replaceAll("dlob~", "</b>");
+                resp.sendRedirect(resp.encodeRedirectURL("error?message=" + error));
+            }
+            return;
+        }
         if (action.equals("connect")) {
             req.setCharacterEncoding("UTF-8");
             String dbName = req.getParameter("dbname");
@@ -82,12 +128,12 @@ public class MainServlet extends HttpServlet {
                 req.getSession().setAttribute("db_manager", dbManager);
                 resp.sendRedirect(resp.encodeRedirectURL(""));
             } catch (Exception e) {
-                req.setAttribute("message",
+                String error =
                         e.getMessage().replaceAll("<", "~bold")
                                       .replaceAll(">", "dlob~")
                                       .replaceAll("~bold", "<b>")
-                                      .replaceAll("dlob~", "</b>"));
-                req.getRequestDispatcher("error.jsp").forward(req, resp);
+                                      .replaceAll("dlob~", "</b>");
+                resp.sendRedirect(resp.encodeRedirectURL("error?message=" + error));
             }
         }
     }

@@ -11,19 +11,26 @@
     <input type = "submit" value = "disconnect">
   </form></th>
  </tr>
+<c:set var="count" value="1" scope="page" />
 <c:forEach items="${tables}" var="table">
  <tr>
-  <td>table</td>
+  <td>table #${count}</td>
   <td></td>
   <td><a href="find?table=${table}">${table}</a></td>
   <td></td>
-  <td><form action = "delete${table}" method = "post">
+  <td><form action = "drop?table=${table}" method = "post">
     <input type = "submit" value = "delete">
   </form></td>
  </tr>
+ <c:set var="count" value="${count + 1}" scope="page"/>
 </c:forEach>
-<tr><td colspan="5" align = "center">
-<a href="createtable">Create new table</a>
-</table>
+</td></tr></table>
+<form action = "create" method = "post">
+<table></tr>
+ <td>#${count}</td>
+ <td><input type = "text" name = "table_name"></td>
+ <td><input type = "submit" value = "Create new"></td>
+</tr></tabe>
+</form>
 
 <jsp:include page="app_footer.jsp" />

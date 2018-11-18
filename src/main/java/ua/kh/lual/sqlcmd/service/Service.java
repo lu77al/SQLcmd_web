@@ -10,4 +10,5 @@ public interface Service {
     DatabaseManager connect(String dbName, String userName, String password);
     List<List<String>> find(DatabaseManager dbManager, String tableName);
     Set<String> tables(DatabaseManager dbManager);
+    void create(DatabaseManager dbManager, String tableName, Set<String> newHeader);
 }

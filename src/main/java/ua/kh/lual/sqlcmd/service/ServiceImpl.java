@@ -38,4 +38,10 @@ public class ServiceImpl implements Service {
     public Set<String> tables(DatabaseManager dbManager) {
         return dbManager.getTableNames();
     }
+
+    @Override
+    public void create(DatabaseManager dbManager, String tableName, Set<String> newHeader) {
+        dbManager.createTable(tableName, newHeader);
+    }
+
 }
