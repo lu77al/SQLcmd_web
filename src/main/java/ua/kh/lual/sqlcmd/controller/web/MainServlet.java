@@ -40,13 +40,17 @@ public class MainServlet extends HttpServlet {
         if (action.equals("")) {
             req.setAttribute("tables", service.tables(dbManager));
             req.getRequestDispatcher("tables.jsp").forward(req, resp);
-        } else  if (action.equals("find")) {
+        } else if (action.equals("find")) {
             String tableName = req.getParameter("table");
             req.setAttribute("name", tableName);
             req.setAttribute("content", service.find(dbManager, tableName));
             req.getRequestDispatcher("find.jsp").forward(req, resp);
-        } else  if (action.equals("create")) {
+        } else if (action.equals("create")) {
             req.getRequestDispatcher("create.jsp").forward(req, resp);
+        } else {
+            req.setAttribute("error_message", "unsupported request");
+            req.setAttribute("error_return_uri", "");
+            req.getRequestDispatcher("error.jsp").forward(req, resp);
         }
 
 //        if (action.equals("")) {
@@ -77,7 +81,7 @@ public class MainServlet extends HttpServlet {
                 dbManager = null;
                 req.getSession().setAttribute("db_manager", dbManager);
             }
-            resp.sendRedirect(resp.encodeRedirectURL(""));
+            resp.sendRedirect(req.getContextPath());
             return;
         }
         if (action.equals("create")) {
@@ -87,7 +91,7 @@ public class MainServlet extends HttpServlet {
             } else {
                 req.getSession().setAttribute("new_table_name", req.getParameter("table_name"));
                 req.getSession().setAttribute("new_header", new LinkedHashSet<String>());
-                resp.sendRedirect(resp.encodeRedirectURL("create"));
+                resp.sendRedirect(req.getContextPath()+ "/create");
             }
             return;
         }
@@ -98,13 +102,13 @@ public class MainServlet extends HttpServlet {
             } else {
                 Set<String> newHeader = (LinkedHashSet) req.getSession().getAttribute("new_header");
                 newHeader.add(columnName);
-                resp.sendRedirect(resp.encodeRedirectURL("create"));
+                resp.sendRedirect(req.getContextPath()+ "/create");
             }
             return;
         }
         if (action.equals("cancel_create")) {
             req.getSession().setAttribute("new_header", null);
-            resp.sendRedirect(resp.encodeRedirectURL(""));
+            resp.sendRedirect(req.getContextPath());
             return;
         }
         if (action.equals("create_prepared")) {
@@ -114,7 +118,7 @@ public class MainServlet extends HttpServlet {
             try {
                 service.create(dbManager, tableName, newHeader);
                 req.getSession().setAttribute("new_header", null);
-                resp.sendRedirect(resp.encodeRedirectURL(""));
+                resp.sendRedirect(req.getContextPath());
             } catch (Exception e) {
                 redirectError(req, resp, getExcpetionMessage(e), "");
             }
@@ -125,7 +129,7 @@ public class MainServlet extends HttpServlet {
             DatabaseManager dbManager = (DatabaseManager) req.getSession().getAttribute("db_manager");
             try {
                 service.drop(dbManager, tableName);
-                resp.sendRedirect(resp.encodeRedirectURL(""));
+                resp.sendRedirect(req.getContextPath());
             } catch (Exception e) {
                 redirectError(req, resp, getExcpetionMessage(e), "");
             }
@@ -141,7 +145,7 @@ public class MainServlet extends HttpServlet {
             try {
                 DatabaseManager dbManager = service.connect(dbName, userName, password);
                 req.getSession().setAttribute("db_manager", dbManager);
-                resp.sendRedirect(resp.encodeRedirectURL(""));
+                resp.sendRedirect(req.getContextPath());
             } catch (Exception e) {
                 redirectError(req, resp, getExcpetionMessage(e), "");
             }
@@ -152,7 +156,7 @@ public class MainServlet extends HttpServlet {
     private void redirectError(HttpServletRequest req, HttpServletResponse resp, String message, String return_uri) throws IOException {
         req.getSession().setAttribute("error_message", message);
         req.getSession().setAttribute("error_return_uri", return_uri);
-        resp.sendRedirect(resp.encodeRedirectURL("error"));
+        resp.sendRedirect(req.getContextPath()+ "/error");
     }
 
     private String getExcpetionMessage(Exception e) {
@@ -165,7 +169,6 @@ public class MainServlet extends HttpServlet {
 
     private String getAction(HttpServletRequest req) {
         String requestURI = req.getRequestURI();
-        String action = requestURI.substring(req.getContextPath().length() + 1, requestURI.length());
-        return action;
+        return requestURI.substring(req.getContextPath().length() + 1, requestURI.length());
     }
 }
