@@ -44,4 +44,9 @@ public class ServiceImpl implements Service {
         dbManager.createTable(tableName, newHeader);
     }
 
+    @Override
+    public void drop(DatabaseManager dbManager, String tableName) {
+        dbManager.dropTable(tableName);
+    }
+
 }

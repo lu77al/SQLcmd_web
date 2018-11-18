@@ -11,4 +11,5 @@ public interface Service {
     List<List<String>> find(DatabaseManager dbManager, String tableName);
     Set<String> tables(DatabaseManager dbManager);
     void create(DatabaseManager dbManager, String tableName, Set<String> newHeader);
+    void drop(DatabaseManager dbManager, String tableName);
 }
