@@ -9,6 +9,7 @@ import ua.kh.lual.sqlcmd.controller.Main;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 
 import static org.junit.Assert.assertEquals;
 
@@ -556,11 +557,7 @@ public class IntegrationTest {
     }
 
     private String getLog() {
-        try {
-            return new String(out.toByteArray(), "UTF-8");
-        } catch (UnsupportedEncodingException e) {
-            return e.getMessage();
-        }
+        return new String(out.toByteArray(), StandardCharsets.UTF_8);
     }
 
 }

@@ -30,7 +30,7 @@
  <td>#${count}</td>
  <td><input type = "text" name = "table_name"></td>
  <td><input type = "submit" value = "Create new"></td>
-</tr></tabe>
+</tr></table>
 </form>
 
 <jsp:include page="app_footer.jsp" />

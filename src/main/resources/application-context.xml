@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+                           http://www.springframework.org/schema/beans/spring-beans-4.3.xsd">
+
+    <bean id="rat" class="ua.kh.lual.sqlcmd.spring.LabRat" init-method="init()">
+        <constructor-arg value="Hi!"/>
+        <property name="name" value="Alice"/>
+        <property name="service" ref="service"/>
+    </bean>
+
+    <bean id="cat" class="ua.kh.lual.sqlcmd.spring.LabRat">
+        <constructor-arg value="Maw!"/>
+        <property name="name" value="Nessie"/>
+        <property name="service" ref="service"/>
+    </bean>
+
+    <bean id="service" class="ua.kh.lual.sqlcmd.spring.HelloWorldService"/>
+
+</beans>
