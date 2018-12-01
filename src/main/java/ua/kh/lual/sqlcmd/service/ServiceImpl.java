@@ -4,13 +4,17 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import ua.kh.lual.sqlcmd.model.DatabaseManager;
 import ua.kh.lual.sqlcmd.model.JDBCManager;
+import ua.kh.lual.sqlcmd.model.MemoryDBManager;
+
 import java.util.*;
 
-@Component(value = "postgresService")
 public class ServiceImpl implements Service {
 
-    @Autowired
-    private DBManagerFactory dbManagerFactory;
+    private String dbType;
+
+    public void setDbType(String dbType) {
+        this.dbType = dbType;
+    }
 
     @Override
     public List<String> commandsList() {
@@ -19,7 +23,12 @@ public class ServiceImpl implements Service {
 
     @Override
     public DatabaseManager connect(String dbName, String userName, String password) {
-        DatabaseManager dbManager = dbManagerFactory.getNewDBManager();
+        DatabaseManager dbManager;
+        try {
+            dbManager = (DatabaseManager) Class.forName(dbType).newInstance();
+        } catch (Exception e) {
+            throw new RuntimeException();
+        }
         dbManager.connect(dbName, userName, password);
         return dbManager;
     }

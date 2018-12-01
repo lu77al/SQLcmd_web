@@ -10,7 +10,8 @@
     <context:annotation-config/>
     <context:component-scan base-package="ua.kh.lual.sqlcmd.service"/>
 
-    <bean id="dbManagerFactory" class="ua.kh.lual.sqlcmd.service.DBManagerFactory">
-        <property name="dbClass" value="ua.kh.lual.sqlcmd.model.MemoryDBManager"/>
+    <bean id="service" class="ua.kh.lual.sqlcmd.service.ServiceImpl">
+        <property name="dbType" value="ua.kh.lual.sqlcmd.model.JDBCManager"/>
     </bean>
+
 </beans>
