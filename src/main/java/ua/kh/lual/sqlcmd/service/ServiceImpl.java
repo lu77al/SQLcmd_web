@@ -8,13 +8,15 @@ import ua.kh.lual.sqlcmd.model.MemoryDBManager;
 
 import java.util.*;
 
-public class ServiceImpl implements Service {
+public abstract class ServiceImpl implements Service {
 
     private String dbType;
 
     public void setDbType(String dbType) {
         this.dbType = dbType;
     }
+
+    public abstract DatabaseManager getManager();
 
     @Override
     public List<String> commandsList() {
@@ -24,11 +26,12 @@ public class ServiceImpl implements Service {
     @Override
     public DatabaseManager connect(String dbName, String userName, String password) {
         DatabaseManager dbManager;
-        try {
-            dbManager = (DatabaseManager) Class.forName(dbType).newInstance();
-        } catch (Exception e) {
-            throw new RuntimeException();
-        }
+        dbManager = getManager();
+//        try {
+//            dbManager = (DatabaseManager) Class.forName(dbType).newInstance();
+//        } catch (Exception e) {
+//            throw new RuntimeException();
+//        }
         dbManager.connect(dbName, userName, password);
         return dbManager;
     }

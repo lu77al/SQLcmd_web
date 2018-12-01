@@ -27,11 +27,11 @@ public class MainServlet extends HttpServlet {
                 config.getServletContext());
     }
 
-    @Override
-    public void init() throws ServletException {
-        super.init();
-        service = new ServiceImpl();
-    }
+//    @Override
+//    public void init() throws ServletException {
+//        super.init();
+//        service = new ServiceImpl();
+//    }
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {

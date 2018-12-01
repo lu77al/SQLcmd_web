@@ -1,7 +1,10 @@
 package ua.kh.lual.sqlcmd.model;
 
+import org.springframework.stereotype.Component;
+
 import java.util.*;
 
+@Component("Memory")
 public class MemoryDBManager implements DatabaseManager {
     private boolean connected = false;
     private LinkedHashMap<String, MemoryTable> tables = new LinkedHashMap<>();

@@ -8,10 +8,10 @@
                            http://www.springframework.org/schema/context/spring-context-4.3.xsd">
 
     <context:annotation-config/>
-    <context:component-scan base-package="ua.kh.lual.sqlcmd.service"/>
+    <context:component-scan base-package="ua.kh.lual.sqlcmd"/>
 
     <bean id="service" class="ua.kh.lual.sqlcmd.service.ServiceImpl">
-        <property name="dbType" value="ua.kh.lual.sqlcmd.model.JDBCManager"/>
+        <lookup-method name="getManager" bean="Postgres"/>
     </bean>
 
 </beans>
