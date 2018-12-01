@@ -1,11 +1,13 @@
 package ua.kh.lual.sqlcmd.model;
 
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import java.sql.*;
 import java.util.*;
 
 @Component("Postgres")
+@Scope("prototype")
 public class JDBCManager implements DatabaseManager {
 
     private Connection connection;
