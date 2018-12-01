@@ -10,7 +10,7 @@
     <context:annotation-config/>
     <context:component-scan base-package="ua.kh.lual.sqlcmd"/>
 
-    <bean id="service" class="ua.kh.lual.sqlcmd.service.ServiceImpl">
+    <bean id="service" class="ua.kh.lual.sqlcmd.service.ConnectionService">
         <lookup-method name="getManager" bean="Postgres"/>
     </bean>
 

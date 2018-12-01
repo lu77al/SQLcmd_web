@@ -3,8 +3,7 @@ package ua.kh.lual.sqlcmd.controller.web;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.context.support.SpringBeanAutowiringSupport;
 import ua.kh.lual.sqlcmd.model.DatabaseManager;
-import ua.kh.lual.sqlcmd.service.Service;
-import ua.kh.lual.sqlcmd.service.ServiceImpl;
+import ua.kh.lual.sqlcmd.service.ConnectionService;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
@@ -12,13 +11,12 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.LinkedHashSet;
-import java.util.Set;
+import java.util.*;
 
 public class MainServlet extends HttpServlet {
 
     @Autowired
-    private Service service;
+    private ConnectionService connectionService;
 
     @Override
     public void init(ServletConfig config) throws ServletException {
@@ -27,11 +25,20 @@ public class MainServlet extends HttpServlet {
                 config.getServletContext());
     }
 
-//    @Override
-//    public void init() throws ServletException {
-//        super.init();
-//        service = new ServiceImpl();
-//    }
+    public List<List<String>> find(DatabaseManager dbManager, String tableName) {
+        List<List<String>> result = new LinkedList<>();
+        List<String> header = new ArrayList<>(dbManager.getTableHeader(tableName));
+        result.add(header);
+        List<List> content = dbManager.getAllContent(tableName);
+        for (List row: content) {
+            List<String> nextRow = new ArrayList<>(header.size());
+            for (Object cell: row) {
+                nextRow.add(cell.toString());
+            }
+            result.add(nextRow);
+        }
+        return result;
+    }
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
@@ -48,12 +55,12 @@ public class MainServlet extends HttpServlet {
         }
 
         if (action.equals("")) {
-            req.setAttribute("tables", service.tables(dbManager));
+            req.setAttribute("tables", dbManager.getTableNames());
             req.getRequestDispatcher("tables.jsp").forward(req, resp);
         } else if (action.equals("find")) {
             String tableName = req.getParameter("table");
             req.setAttribute("name", tableName);
-            req.setAttribute("content", service.find(dbManager, tableName));
+            req.setAttribute("content", find(dbManager, tableName));
             req.getRequestDispatcher("find.jsp").forward(req, resp);
         } else if (action.equals("create")) {
             req.getRequestDispatcher("create.jsp").forward(req, resp);
@@ -126,7 +133,7 @@ public class MainServlet extends HttpServlet {
             Set<String> newHeader = (LinkedHashSet)req.getSession().getAttribute("new_header");
             DatabaseManager dbManager = (DatabaseManager) req.getSession().getAttribute("db_manager");
             try {
-                service.create(dbManager, tableName, newHeader);
+                dbManager.createTable(tableName, newHeader);
                 req.getSession().setAttribute("new_header", null);
                 resp.sendRedirect(req.getContextPath());
             } catch (Exception e) {
@@ -138,7 +145,7 @@ public class MainServlet extends HttpServlet {
             String tableName = req.getParameter("table");
             DatabaseManager dbManager = (DatabaseManager) req.getSession().getAttribute("db_manager");
             try {
-                service.drop(dbManager, tableName);
+                dbManager.dropTable(tableName);
                 resp.sendRedirect(req.getContextPath());
             } catch (Exception e) {
                 redirectError(req, resp, getExcpetionMessage(e), "");
@@ -153,7 +160,7 @@ public class MainServlet extends HttpServlet {
             String password = req.getParameter("password");
             req.getSession().setAttribute("db_name", dbName);
             try {
-                DatabaseManager dbManager = service.connect(dbName, userName, password);
+                DatabaseManager dbManager = connectionService.connect(dbName, userName, password);
                 req.getSession().setAttribute("db_manager", dbManager);
                 resp.sendRedirect(req.getContextPath());
             } catch (Exception e) {

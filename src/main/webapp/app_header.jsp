@@ -1,4 +1,4 @@
-<html><head><title>HTML Table Background</title>
+<html><head><title>SQLCMD->WEB (Spring IoC)</title>
 <base href="${pageContext.request.contextPath}/"/>
 <style type='text/css'>
 /* form elements */
@@ -12,5 +12,5 @@ form {
 </head>
 <body link="blue" vlink="blue">
 <table cellpadding="10" border = "1" bordercolor = "green">
-<tr bgcolor = "#ccff99" align = "left"><td color="red">[SQLCMD] - JSP based web-version</td></tr>
+<tr bgcolor = "#ccff99" align = "left"><td color="red">[SQLCMD] - on it's way to WEB (Spring IoC)</td></tr>
 <tr bgcolor = "#ffffcc" align = "left"><td>
