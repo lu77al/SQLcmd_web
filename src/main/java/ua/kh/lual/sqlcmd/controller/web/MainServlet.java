@@ -25,6 +25,128 @@ public class MainServlet extends HttpServlet {
                 config.getServletContext());
     }
 
+    @Override
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        String action = getAction(req);
+
+        if (action.equals("error")) {
+            showJSP("error", req, resp);
+            return;
+        }
+
+        DatabaseManager dbManager = getDBManager(req);
+        if (dbManager == null) {
+            showJSP("connect", req, resp);
+            return;
+        }
+
+        if (action.equals("")) {
+            req.setAttribute("tables", dbManager.getTableNames());
+            showJSP("tables", req, resp);
+
+        } else if (action.equals("find")) {
+            String tableName = req.getParameter("table");
+            req.setAttribute("name", tableName);
+            req.setAttribute("content", find(dbManager, tableName));
+            showJSP("find", req, resp);
+
+        } else if (action.equals("create")) {
+            showJSP("create", req, resp);
+
+        } else {
+            redirectError("unsupported request", "", req, resp);
+        }
+
+    }
+
+
+    @Override
+    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        String action = getAction(req);
+
+        if (action.equals("disconnect")) {
+            DatabaseManager dbManager = getDBManager(req);
+            if (dbManager != null) {
+                dbManager.disconnect();
+                dbManager = null;
+                req.getSession().setAttribute("db_manager", dbManager);
+            }
+            redirect("", req, resp);
+            return;
+        }
+
+        if (action.equals("create")) {
+            String tableName = req.getParameter("table_name");
+            if (tableName.length() == 0) {
+                redirectError("Can\'t create table without name", "", req, resp);
+            } else {
+                req.getSession().setAttribute("new_table_name", req.getParameter("table_name"));
+                req.getSession().setAttribute("new_header", new LinkedHashSet<String>());
+                redirect("create", req, resp);
+            }
+            return;
+        }
+
+        if (action.equals("add_column")) {
+            String columnName = req.getParameter("column_name");
+            if (columnName.length() == 0) {
+                redirectError("Can\'t create empty column", "create", req, resp);
+            } else {
+                Set<String> newHeader = (LinkedHashSet) req.getSession().getAttribute("new_header");
+                newHeader.add(columnName);
+                redirect("create", req, resp);
+            }
+            return;
+        }
+
+        if (action.equals("cancel_create")) {
+            req.getSession().setAttribute("new_header", null);
+            redirect("", req, resp);
+            return;
+        }
+
+        if (action.equals("create_prepared")) {
+            String tableName = (String)req.getSession().getAttribute("new_table_name");
+            Set<String> newHeader = (LinkedHashSet)req.getSession().getAttribute("new_header");
+            DatabaseManager dbManager = getDBManager(req);
+            try {
+                dbManager.createTable(tableName, newHeader);
+                req.getSession().setAttribute("new_header", null);
+                redirect("", req, resp);
+            } catch (Exception e) {
+                redirectError(getExceptionMessage(e), "", req, resp);
+            }
+            return;
+        }
+        if (action.equals("drop")) {
+            String tableName = req.getParameter("table");
+            DatabaseManager dbManager = getDBManager(req);
+            try {
+                dbManager.dropTable(tableName);
+                redirect("", req, resp);
+            } catch (Exception e) {
+                redirectError(getExceptionMessage(e), "", req, resp);
+            }
+            return;
+        }
+
+        if (action.equals("connect")) {
+            req.setCharacterEncoding("UTF-8");
+            String dbName = req.getParameter("dbname");
+            String userName = req.getParameter("username");
+            String password = req.getParameter("password");
+            req.getSession().setAttribute("db_name", dbName);
+            try {
+                DatabaseManager dbManager = connectionService.connect(dbName, userName, password);
+                req.getSession().setAttribute("db_manager", dbManager);
+                redirect("", req, resp);
+            } catch (Exception e) {
+                redirectError(getExceptionMessage(e), "", req, resp);
+            }
+            return;
+        }
+    }
+
     public List<List<String>> find(DatabaseManager dbManager, String tableName) {
         List<List<String>> result = new LinkedList<>();
         List<String> header = new ArrayList<>(dbManager.getTableHeader(tableName));
@@ -40,143 +162,25 @@ public class MainServlet extends HttpServlet {
         return result;
     }
 
-    @Override
-    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        String action = getAction(req);
-        if (action.equals("error")) {
-            req.getRequestDispatcher("error.jsp").forward(req, resp);
-            return;
-        }
-
-        DatabaseManager dbManager = (DatabaseManager) req.getSession().getAttribute("db_manager");
-        if (dbManager == null) {
-            req.getRequestDispatcher("connect.jsp").forward(req, resp);
-            return;
-        }
-
-        if (action.equals("")) {
-            req.setAttribute("tables", dbManager.getTableNames());
-            req.getRequestDispatcher("tables.jsp").forward(req, resp);
-        } else if (action.equals("find")) {
-            String tableName = req.getParameter("table");
-            req.setAttribute("name", tableName);
-            req.setAttribute("content", find(dbManager, tableName));
-            req.getRequestDispatcher("find.jsp").forward(req, resp);
-        } else if (action.equals("create")) {
-            req.getRequestDispatcher("create.jsp").forward(req, resp);
-        } else {
-            req.setAttribute("error_message", "unsupported request");
-            req.setAttribute("error_return_uri", "");
-            req.getRequestDispatcher("error.jsp").forward(req, resp);
-        }
-
-//        if (action.equals("")) {
-//            req.setAttribute("items", service.commandsList());
-//            req.getRequestDispatcher("menu.jsp").forward(req, resp);
-//        } else if (action.equals("help")) {
-//            req.getRequestDispatcher("help.jsp").forward(req, resp);
-//        } else if (action.equals("connect")) {
-//            req.getRequestDispatcher("connect.jsp").forward(req, resp);
-//        } else if (action.equals("find")) {
-//            String tableName = req.getParameter("table");
-//            req.setAttribute("table", service.find(dbManager, tableName));
-//            req.getRequestDispatcher("find.jsp").forward(req, resp);
-//        } else {
-//            req.setAttribute("message", "unsupported request");
-//            req.getRequestDispatcher("error.jsp").forward(req, resp);
-//        }
-
+    private void redirect(String uri, HttpServletRequest req, HttpServletResponse resp) throws IOException {
+        resp.sendRedirect(req.getContextPath()+ "/" + uri);
     }
 
-    @Override
-    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        String action = getAction(req);
-        if (action.equals("disconnect")) {
-            DatabaseManager dbManager = (DatabaseManager) req.getSession().getAttribute("db_manager");
-            if (dbManager != null) {
-                dbManager.disconnect();
-                dbManager = null;
-                req.getSession().setAttribute("db_manager", dbManager);
-            }
-            resp.sendRedirect(req.getContextPath());
-            return;
-        }
-        if (action.equals("create")) {
-            String tableName = req.getParameter("table_name");
-            if (tableName.length() == 0) {
-                redirectError(req, resp,"Can\'t create table without name", "");
-            } else {
-                req.getSession().setAttribute("new_table_name", req.getParameter("table_name"));
-                req.getSession().setAttribute("new_header", new LinkedHashSet<String>());
-                resp.sendRedirect(req.getContextPath()+ "/create");
-            }
-            return;
-        }
-        if (action.equals("add_column")) {
-            String columnName = req.getParameter("column_name");
-            if (columnName.length() == 0) {
-                redirectError(req, resp, "Can\'t create empty column", "create");
-            } else {
-                Set<String> newHeader = (LinkedHashSet) req.getSession().getAttribute("new_header");
-                newHeader.add(columnName);
-                resp.sendRedirect(req.getContextPath()+ "/create");
-            }
-            return;
-        }
-        if (action.equals("cancel_create")) {
-            req.getSession().setAttribute("new_header", null);
-            resp.sendRedirect(req.getContextPath());
-            return;
-        }
-        if (action.equals("create_prepared")) {
-            String tableName = (String)req.getSession().getAttribute("new_table_name");
-            Set<String> newHeader = (LinkedHashSet)req.getSession().getAttribute("new_header");
-            DatabaseManager dbManager = (DatabaseManager) req.getSession().getAttribute("db_manager");
-            try {
-                dbManager.createTable(tableName, newHeader);
-                req.getSession().setAttribute("new_header", null);
-                resp.sendRedirect(req.getContextPath());
-            } catch (Exception e) {
-                redirectError(req, resp, getExcpetionMessage(e), "");
-            }
-            return;
-        }
-        if (action.equals("drop")) {
-            String tableName = req.getParameter("table");
-            DatabaseManager dbManager = (DatabaseManager) req.getSession().getAttribute("db_manager");
-            try {
-                dbManager.dropTable(tableName);
-                resp.sendRedirect(req.getContextPath());
-            } catch (Exception e) {
-                redirectError(req, resp, getExcpetionMessage(e), "");
-            }
-            return;
-        }
-
-        if (action.equals("connect")) {
-            req.setCharacterEncoding("UTF-8");
-            String dbName = req.getParameter("dbname");
-            String userName = req.getParameter("username");
-            String password = req.getParameter("password");
-            req.getSession().setAttribute("db_name", dbName);
-            try {
-                DatabaseManager dbManager = connectionService.connect(dbName, userName, password);
-                req.getSession().setAttribute("db_manager", dbManager);
-                resp.sendRedirect(req.getContextPath());
-            } catch (Exception e) {
-                redirectError(req, resp, getExcpetionMessage(e), "");
-            }
-            return;
-        }
+    private void showJSP(String jspName, HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        req.getRequestDispatcher(jspName + ".jsp").forward(req, resp);
     }
 
-    private void redirectError(HttpServletRequest req, HttpServletResponse resp, String message, String return_uri) throws IOException {
+    private DatabaseManager getDBManager(HttpServletRequest req) {
+        return (DatabaseManager) req.getSession().getAttribute("db_manager");
+    }
+
+    private void redirectError(String message, String return_uri, HttpServletRequest req, HttpServletResponse resp) throws IOException {
         req.getSession().setAttribute("error_message", message);
         req.getSession().setAttribute("error_return_uri", return_uri);
-        resp.sendRedirect(req.getContextPath()+ "/error");
+        redirect("error", req, resp);
     }
 
-    private String getExcpetionMessage(Exception e) {
+    private String getExceptionMessage(Exception e) {
         return e.getMessage()
                 .replaceAll("<", "~bold")
                 .replaceAll(">", "dlob~")
@@ -187,5 +191,5 @@ public class MainServlet extends HttpServlet {
     private String getAction(HttpServletRequest req) {
         String requestURI = req.getRequestURI();
         return requestURI.substring(req.getContextPath().length() + 1, requestURI.length());
-    }
+   }
 }
