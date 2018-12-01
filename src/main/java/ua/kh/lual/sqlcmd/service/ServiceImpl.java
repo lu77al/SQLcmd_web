@@ -1,9 +1,11 @@
 package ua.kh.lual.sqlcmd.service;
 
+import org.springframework.stereotype.Component;
 import ua.kh.lual.sqlcmd.model.DatabaseManager;
 import ua.kh.lual.sqlcmd.model.JDBCManager;
 import java.util.*;
 
+@Component(value = "postgresService")
 public class ServiceImpl implements Service {
 
     @Override
