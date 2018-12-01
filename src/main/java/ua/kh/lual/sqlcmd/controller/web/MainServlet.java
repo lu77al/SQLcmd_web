@@ -17,7 +17,6 @@ import java.util.Set;
 
 public class MainServlet extends HttpServlet {
 
-
     @Autowired
     private Service service;
 

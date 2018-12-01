@@ -1,5 +1,6 @@
 package ua.kh.lual.sqlcmd.service;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import ua.kh.lual.sqlcmd.model.DatabaseManager;
 import ua.kh.lual.sqlcmd.model.JDBCManager;
@@ -8,6 +9,9 @@ import java.util.*;
 @Component(value = "postgresService")
 public class ServiceImpl implements Service {
 
+    @Autowired
+    private DBManagerFactory dbManagerFactory;
+
     @Override
     public List<String> commandsList() {
         return Arrays.asList("help", "connect", "tables", "find");
@@ -15,7 +19,7 @@ public class ServiceImpl implements Service {
 
     @Override
     public DatabaseManager connect(String dbName, String userName, String password) {
-        DatabaseManager dbManager = new JDBCManager();
+        DatabaseManager dbManager = dbManagerFactory.getNewDBManager();
         dbManager.connect(dbName, userName, password);
         return dbManager;
     }
