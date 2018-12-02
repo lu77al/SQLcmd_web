@@ -1,4 +1,4 @@
-package ua.kh.lual.sqlcmd.model;
+package ua.kh.lual.sqlcmd.dao;
 
 import java.util.List;
 import java.util.Map;

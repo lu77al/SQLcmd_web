@@ -26,7 +26,7 @@
 
     <servlet>
         <servlet-name>MainServlet</servlet-name>
-        <servlet-class>ua.kh.lual.sqlcmd.controller.web.MainServlet</servlet-class>
+        <servlet-class>ua.kh.lual.sqlcmd.web.MainServlet</servlet-class>
     </servlet>
 
     <servlet-mapping>

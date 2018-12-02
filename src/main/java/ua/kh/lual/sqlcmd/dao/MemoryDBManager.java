@@ -1,4 +1,4 @@
-package ua.kh.lual.sqlcmd.model;
+package ua.kh.lual.sqlcmd.dao;
 
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;

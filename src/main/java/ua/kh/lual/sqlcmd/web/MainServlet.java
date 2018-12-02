@@ -1,8 +1,8 @@
-package ua.kh.lual.sqlcmd.controller.web;
+package ua.kh.lual.sqlcmd.web;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.context.support.SpringBeanAutowiringSupport;
-import ua.kh.lual.sqlcmd.model.DatabaseManager;
+import ua.kh.lual.sqlcmd.dao.DatabaseManager;
 import ua.kh.lual.sqlcmd.service.ConnectionService;
 
 import javax.servlet.ServletConfig;

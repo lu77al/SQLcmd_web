@@ -1,6 +1,6 @@
 package ua.kh.lual.sqlcmd.service;
 
-import ua.kh.lual.sqlcmd.model.DatabaseManager;
+import ua.kh.lual.sqlcmd.dao.DatabaseManager;
 
 public abstract class ConnectionService {
 

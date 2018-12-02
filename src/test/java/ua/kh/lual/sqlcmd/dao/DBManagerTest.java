@@ -1,4 +1,4 @@
-package ua.kh.lual.sqlcmd.model;
+package ua.kh.lual.sqlcmd.dao;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -12,16 +12,16 @@ import static org.junit.Assert.assertFalse;
 
 public abstract class DBManagerTest {
 
-    protected static final String database = NamesAndPasswords.database;
-    protected static final String user = NamesAndPasswords.user;
-    protected static final String password = NamesAndPasswords.password;
-    protected static final String table = NamesAndPasswords.table;
+    protected static final String database = NamesAndPasswords.DATABASE;
+    protected static final String user = NamesAndPasswords.USER;
+    protected static final String password = NamesAndPasswords.PASSWORD;
+    protected static final String table = NamesAndPasswords.TABLE;
 
     protected DatabaseManager dbManager;
 
     private void createTable() {
         try {
-            dbManager.createTable(table, new LinkedHashSet<String>(Arrays.asList("name", "password")));
+            dbManager.createTable(table, new LinkedHashSet<String>(Arrays.asList("name", "PASSWORD")));
         } catch (Exception e) {
             // Just catch
         }
@@ -38,10 +38,10 @@ public abstract class DBManagerTest {
     private void fillTable() throws Exception {
         Map<String, Object> row = new LinkedHashMap<>();
         row.put("name", "Vasiliy");
-        row.put("password", "parol");
+        row.put("PASSWORD", "parol");
         dbManager.insert(table, row);
         row.put("name", "Marina");
-        row.put("password", "hook");
+        row.put("PASSWORD", "hook");
         dbManager.insert(table, row);
     }
 
@@ -57,7 +57,7 @@ public abstract class DBManagerTest {
     public void testCreateTable() {
         boolean failed = false;
         try {
-            dbManager.createTable(table, new LinkedHashSet<String>(Arrays.asList("name", "password")));
+            dbManager.createTable(table, new LinkedHashSet<String>(Arrays.asList("name", "PASSWORD")));
         } catch (Exception e) {
             failed = true;
         }
@@ -91,7 +91,7 @@ public abstract class DBManagerTest {
         createTable();
         String header = dbManager.getTableHeader(table).toString();
         dropTable();
-        assertEquals("[name, password]", header);
+        assertEquals("[name, PASSWORD]", header);
     }
 
     @Test
@@ -176,7 +176,7 @@ public abstract class DBManagerTest {
         Map<String, Object> key = new LinkedHashMap<>();
         key.put("name", "Vasiliy");
         Map<String, Object> update = new LinkedHashMap<>();
-        update.put("password", "ChertPoberi");
+        update.put("PASSWORD", "ChertPoberi");
         dbManager.update(table, update, key);
         List<List> content = dbManager.getAllContent(table);
         dropTable();

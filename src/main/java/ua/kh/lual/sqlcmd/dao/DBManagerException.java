@@ -1,4 +1,4 @@
-package ua.kh.lual.sqlcmd.model;
+package ua.kh.lual.sqlcmd.dao;
 
 public class DBManagerException extends RuntimeException {
     public DBManagerException(String s) {

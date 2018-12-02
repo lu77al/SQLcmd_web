@@ -1,4 +1,4 @@
-package ua.kh.lual.sqlcmd.model;
+package ua.kh.lual.sqlcmd.dao;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -13,20 +13,20 @@ public class MemoryTableTest {
 
     @Before
     public void createTable() {
-        table = new MemoryTable(new LinkedHashSet<>(Arrays.asList("id", "name", "password")));
-        assertEquals( "[id, name, password]", table.getHeader().toString());
+        table = new MemoryTable(new LinkedHashSet<>(Arrays.asList("id", "name", "PASSWORD")));
+        assertEquals( "[id, name, PASSWORD]", table.getHeader().toString());
         Map<String, Object> row = new LinkedHashMap<>();
         row.put("id", "1");
         row.put("name", "Vasiliy");
-        row.put("password", "parol");
+        row.put("PASSWORD", "parol");
         table.insert(row);
         row.put("id", "2");
         row.put("name", "Marina");
-        row.put("password", "hook");
+        row.put("PASSWORD", "hook");
         table.insert(row);
         row = new LinkedHashMap<>();
         row.put("id", "3");
-        row.put("password", "password");
+        row.put("PASSWORD", "PASSWORD");
         table.insert(row);
         row = new LinkedHashMap<>();
         row.put("id", "4");
@@ -34,20 +34,20 @@ public class MemoryTableTest {
         table.insert(row);
         row.put("id", "5");
         row.put("name", "Boris");
-        row.put("password", "parol");
+        row.put("PASSWORD", "parol");
         table.insert(row);
     }
 
     @Test
     public void getHeaderTest() {
-        assertEquals( "[id, name, password]", table.getHeader().toString());
+        assertEquals( "[id, name, PASSWORD]", table.getHeader().toString());
     }
 
     @Test
     public void getContentTest() {
         assertEquals( "[[1, Vasiliy, parol]," +
                                " [2, Marina, hook]," +
-                               " [3, null, password]," +
+                               " [3, null, PASSWORD]," +
                                " [4, Pasha, null]," +
                                " [5, Boris, parol]]",
         table.getContent().toString());
@@ -57,7 +57,7 @@ public class MemoryTableTest {
     public void getFilteredContentTest() {
         Map<String, Object> key = new LinkedHashMap<>();
 
-        key.put("password", "parol");
+        key.put("PASSWORD", "parol");
         assertEquals( "[[1, Vasiliy, parol], [5, Boris, parol]]",
                 table.getFilteredContent(key).toString());
 
@@ -91,24 +91,24 @@ public class MemoryTableTest {
         Map<String, Object> where = new LinkedHashMap<>();
         Map<String, Object> update = new LinkedHashMap<>();
 
-        where.put("password", "parol");
-        update.put("password", "password");
+        where.put("PASSWORD", "parol");
+        update.put("PASSWORD", "PASSWORD");
         table.update(update, where);
-        assertEquals( "[[1, Vasiliy, password]," +
+        assertEquals( "[[1, Vasiliy, PASSWORD]," +
                         " [2, Marina, hook]," +
-                        " [3, null, password]," +
+                        " [3, null, PASSWORD]," +
                         " [4, Pasha, null]," +
-                        " [5, Boris, password]]",
+                        " [5, Boris, PASSWORD]]",
                 table.getContent().toString());
 
-        where.put("password", "1234");
-        update.put("password", "5678");
+        where.put("PASSWORD", "1234");
+        update.put("PASSWORD", "5678");
         table.update(update, where);
-        assertEquals( "[[1, Vasiliy, password]," +
+        assertEquals( "[[1, Vasiliy, PASSWORD]," +
                         " [2, Marina, hook]," +
-                        " [3, null, password]," +
+                        " [3, null, PASSWORD]," +
                         " [4, Pasha, null]," +
-                        " [5, Boris, password]]",
+                        " [5, Boris, PASSWORD]]",
                 table.getContent().toString());
 
         where = new LinkedHashMap<>();
@@ -116,13 +116,13 @@ public class MemoryTableTest {
 
         where.put("id", "1");
         update.put("name", "Alex");
-        update.put("password", "postgres");
+        update.put("PASSWORD", "postgres");
         table.update(update, where);
         assertEquals( "[[1, Alex, postgres]," +
                         " [2, Marina, hook]," +
-                        " [3, null, password]," +
+                        " [3, null, PASSWORD]," +
                         " [4, Pasha, null]," +
-                        " [5, Boris, password]]",
+                        " [5, Boris, PASSWORD]]",
                 table.getContent().toString());
     }
 
@@ -130,10 +130,10 @@ public class MemoryTableTest {
     public void deleteTest() {
         Map<String, Object> key = new LinkedHashMap<>();
 
-        key.put("password", "parol");
+        key.put("PASSWORD", "parol");
         table.delete(key);
         assertEquals( "[[2, Marina, hook]," +
-                        " [3, null, password]," +
+                        " [3, null, PASSWORD]," +
                         " [4, Pasha, null]]",
                 table.getContent().toString());
 
